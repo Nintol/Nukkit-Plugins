@@ -18,6 +18,8 @@
 | Version    | 1.0.0-SNAPSHOT    |
 
 
+--------------
+
 
 # Permission node
 | Permisson                         | Default |
@@ -32,6 +34,10 @@
 | showinfo.command.showinfo.reload  | OP      |
 | showinfo.command.showinfo.save    | OP      |
 | showinfo.command.showinfo.reset   | FALSE   |
+
+
+--------------
+
 
 # Replaceable text
 - at send information to player
