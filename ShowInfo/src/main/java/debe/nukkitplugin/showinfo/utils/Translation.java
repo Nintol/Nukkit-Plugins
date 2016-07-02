@@ -9,12 +9,14 @@ import debe.nukkitplugin.showinfo.ShowInfo;
 
 public class Translation{
 	protected static LinkedHashMap<String, String> langs;
+	private static String lang = "default";
 
 	public static void load(String lang){
+		Translation.lang = lang;
 		lang = lang.equalsIgnoreCase("default") ? Server.getInstance().getLanguage().getLang() : lang.toLowerCase();
 		File file = new File(ShowInfo.getInstance().getDataFolder() + "/lang/" + lang + ".ini");
 		if(file.exists() && file.isFile()){
-			Translation.langs = Utils.parseProperties(Utils.loadFile(file), new LinkedHashMap<String, String>(){
+			Translation.langs = FileUtils.parseProperties(FileUtils.loadFile(file), new LinkedHashMap<String, String>(){
 				{
 					put("prefix", "[ShowInfo]");
 					put("colors.success", TextFormat.GREEN);
@@ -65,5 +67,33 @@ public class Translation{
 			}
 			return text.replace("\\n", "\n");
 		}
+	}
+
+	public static String successedTranslate(String langText){
+		return Translation.successedTranslate(langText, new String[]{});
+	}
+
+	public static String successedTranslate(String langText, String param){
+		return Translation.successedTranslate(langText, new String[]{param});
+	}
+
+	public static String successedTranslate(String langText, String[] params){
+		return Translation.translate("colors.success") + Translation.translate("prefix") + " " + Translation.translate(langText, params);
+	}
+
+	public static String failedTranslate(String langText){
+		return Translation.failedTranslate(langText, new String[]{});
+	}
+
+	public static String failedTranslate(String langText, String param){
+		return Translation.failedTranslate(langText, new String[]{param});
+	}
+
+	public static String failedTranslate(String langText, String[] params){
+		return Translation.translate("colors.failed") + Translation.translate("prefix") + " " + Translation.translate(langText, params);
+	}
+
+	public static String getLang(){
+		return Translation.lang;
 	}
 }

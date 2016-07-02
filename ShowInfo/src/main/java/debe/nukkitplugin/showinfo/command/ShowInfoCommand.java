@@ -1,6 +1,5 @@
 package debe.nukkitplugin.showinfo.command;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -8,18 +7,20 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import debe.nukkitplugin.showinfo.ShowInfo;
 import debe.nukkitplugin.showinfo.command.subcommand.PlayerSubCommand;
 import debe.nukkitplugin.showinfo.command.subcommand.SubCommand;
+import debe.nukkitplugin.showinfo.command.subcommand.SubCommandData;
 import debe.nukkitplugin.showinfo.utils.Translation;
 import debe.nukkitplugin.showinfo.utils.Utils;
 
 public class ShowInfoCommand extends Command{
 	private LinkedHashMap<String, SubCommand> subCommands = new LinkedHashMap<String, SubCommand>();
 
-	public ShowInfoCommand(String name, String[] aliases, Map<String, String> subCommands){
+	public ShowInfoCommand(String name, String[] aliases, Map<String, SubCommandData> subCommands){
 		super(name);
 		this.setPermission("showinfo.command.showinfo");
 		this.setAliases(aliases);
@@ -57,100 +58,96 @@ public class ShowInfoCommand extends Command{
 		return "/" + this.getLabel() + " <" + String.join(" | ", this.subCommands.values().stream().filter(subCommand->subCommand.hasPermission(sender)).map(SubCommand::getName).collect(Collectors.toList())) + ">";
 	}
 
-	public void registerSubCommands(Map<String, String> subCommands){
+	public void registerSubCommands(Map<String, SubCommandData> subCommands){
 		ShowInfo plugin = ShowInfo.getInstance();
-		this.registerSubCommand(new PlayerSubCommand(this, subCommands.getOrDefault("on", "On"), "showinfo.command.showinfo.on"){
-			public void execute(CommandSender sender, String[] args){
-				if(plugin.getData().containsKey((sender.getName()))){
-					sender.sendMessage(Translation.translate("colors.failed") + Translation.translate("prefix") + " " + Translation.translate("commands.on.failed"));
+		this.registerSubCommand(new PlayerSubCommand(this, subCommands.get("on"), "showinfo.command.showinfo.on"){
+			public void execute(Player player, String[] args){
+				if(!plugin.getIgnoreTipPlayers().contains((player.getName().toLowerCase()))){
+					player.sendMessage(Translation.failedTranslate("commands.on.failed"));
 				}else{
-					plugin.getData().remove(sender.getName().toLowerCase());
-					sender.sendMessage(Translation.translate("colors.success") + Translation.translate("prefix") + " " + Translation.translate("commands.on.success"));
+					plugin.getIgnoreTipPlayers().remove(player.getName().toLowerCase());
+					player.sendMessage(Translation.successedTranslate("commands.on.success"));
 				}
 			}
 		});
-		this.registerSubCommand(new PlayerSubCommand(this, subCommands.getOrDefault("off", "Off"), "showinfo.command.showinfo.off"){
-			public void execute(CommandSender sender, String[] args){
-				if(!plugin.getData().containsKey(sender.getName())){
-					sender.sendMessage(Translation.translate("colors.failed") + Translation.translate("prefix") + " " + Translation.translate("commands.off.failed"));
+		this.registerSubCommand(new PlayerSubCommand(this, subCommands.get("off"), "showinfo.command.showinfo.off"){
+			public void execute(Player player, String[] args){
+				if(plugin.getIgnoreTipPlayers().contains(player.getName().toLowerCase())){
+					player.sendMessage(Translation.failedTranslate("commands.off.failed"));
 				}else{
-					plugin.getData().put(sender.getName().toLowerCase(), true);
-					sender.sendMessage(Translation.translate("colors.success") + Translation.translate("prefix") + " " + Translation.translate("commands.off.success"));
+					plugin.getIgnoreTipPlayers().add(player.getName().toLowerCase());
+					player.sendMessage(Translation.successedTranslate("commands.off.success"));
 				}
 			}
 		});
-		this.registerSubCommand(new SubCommand(this, subCommands.getOrDefault("enable", "Enable"), "showinfo.command.showinfo.enable"){
+		this.registerSubCommand(new SubCommand(this, subCommands.get("enable"), "showinfo.command.showinfo.enable"){
 			public void execute(CommandSender sender, String[] args){
 				if(!plugin.isTaskStop()){
-					sender.sendMessage(Translation.translate("colors.failed") + Translation.translate("prefix") + " " + Translation.translate("commands.enable.failed"));
+					sender.sendMessage(Translation.failedTranslate("commands.enable.failed"));
 				}else{
-					plugin.getSetting().put("Enable", true);
+					plugin.setEnable(true);
 					plugin.taskStart();
-					sender.sendMessage(Translation.translate("colors.success") + Translation.translate("prefix") + " " + Translation.translate("commands.enable.success"));
+					sender.sendMessage(Translation.successedTranslate("commands.enable.success"));
 				}
 			}
 		});
-		this.registerSubCommand(new SubCommand(this, subCommands.getOrDefault("disable", "Disable"), "showinfo.command.showinfo.disable"){
+		this.registerSubCommand(new SubCommand(this, subCommands.get("disable"), "showinfo.command.showinfo.disable"){
 			public void execute(CommandSender sender, String[] args){
 				if(plugin.isTaskStop()){
-					sender.sendMessage(Translation.translate("colors.failed") + Translation.translate("prefix") + " " + Translation.translate("commands.disable.failed"));
+					sender.sendMessage(Translation.failedTranslate("commands.disable.failed"));
 				}else{
-					plugin.getSetting().put("Enable", false);
+					plugin.setEnable(false);
 					plugin.taskStop();
-					sender.sendMessage(Translation.translate("colors.success") + Translation.translate("prefix") + " " + Translation.translate("commands.disable.success"));
+					sender.sendMessage(Translation.successedTranslate("commands.disable.success"));
 				}
 			}
 		});
-		this.registerSubCommand(new SubCommand(this, subCommands.getOrDefault("push", "Push"), "showinfo.command.showinfo.push", Translation.translate("commands.push.usage"), 1){
+		this.registerSubCommand(new SubCommand(this, subCommands.get("push"), "showinfo.command.showinfo.push", Translation.translate("commands.push.usage"), 1){
 			public void execute(CommandSender sender, String[] args){
 				if(!Pattern.matches("(^-[0-9]*$)|(^[0-9]+$)", args[0])){
-					sender.sendMessage(Translation.translate("colors.failed") + Translation.translate("prefix") + " " + Translation.translate("commands.generic.invalidNumber", args[0]));
+					sender.sendMessage(Translation.failedTranslate("commands.generic.invalidNumber", args[0]));
 				}else{
 					int pushLevel = Utils.toInt(args[0]);
-					plugin.getSetting().put("PushLevel", pushLevel);
-					sender.sendMessage(Translation.translate("colors.success") + Translation.translate("prefix") + " " + Translation.translate("commands.push.success", String.valueOf(pushLevel)));
+					plugin.setPushLevel(pushLevel);
+					sender.sendMessage(Translation.successedTranslate("commands.push.success", String.valueOf(pushLevel)));
 				}
 			}
 		});
-		this.registerSubCommand(new SubCommand(this, subCommands.getOrDefault("period", "Period"), "showinfo.command.showinfo.period", Translation.translate("commands.period.usage"), 1){
+		this.registerSubCommand(new SubCommand(this, subCommands.get("period"), "showinfo.command.showinfo.period", Translation.translate("commands.period.usage"), 1){
 			public void execute(CommandSender sender, String[] args){
 				if(!Pattern.matches("(^[1-9][0-9]*$)|(^[1-9]+$)", args[0])){
-					sender.sendMessage(Translation.translate("colors.failed") + Translation.translate("prefix") + " " + Translation.translate("commands.generic.invalidNumber", args[0]));
+					sender.sendMessage(Translation.failedTranslate("commands.generic.invalidNumber", args[0]));
 				}else{
 					int period = Utils.toInt(args[0]);
-					plugin.getSetting().put("Period", period);
-					if(Utils.toBoolean(plugin.getSetting().get("Enable").toString())){
+					plugin.setPeriod(period);
+					if(plugin.getEnable()){
 						plugin.taskStart();
 					}
-					sender.sendMessage(Translation.translate("colors.success") + Translation.translate("prefix") + " " + Translation.translate("commands.period.success", String.valueOf(period)));
+					sender.sendMessage(Translation.successedTranslate("commands.period.success", String.valueOf(period)));
 				}
 			}
 		});
-		this.registerSubCommand(new SubCommand(this, subCommands.getOrDefault("reload", "Reload"), "showinfo.command.showinfo.reload"){
+		this.registerSubCommand(new SubCommand(this, subCommands.get("reload"), "showinfo.command.showinfo.reload"){
 			public void execute(CommandSender sender, String[] args){
-				new File(plugin.getDataFolder() + "/lang").mkdirs();
 				plugin.saveDefaultData(false);
-				plugin.loadData();
-				Translation.load(plugin.getSetting().get("Language").toString().trim());
-				plugin.updatePermissions();
-				plugin.registerCommands();
-				sender.sendMessage(Translation.translate("colors.success") + Translation.translate("prefix") + " " + Translation.translate("commands.reload.success"));
+				plugin.loadAll();
+				sender.sendMessage(Translation.successedTranslate("commands.reload.success"));
 			}
 		});
-		this.registerSubCommand(new SubCommand(this, subCommands.getOrDefault("save", "Save"), "showinfo.command.showinfo.save"){
+		this.registerSubCommand(new SubCommand(this, subCommands.get("save"), "showinfo.command.showinfo.save"){
 			public void execute(CommandSender sender, String[] args){
-				plugin.saveData();
-				sender.sendMessage(Translation.translate("colors.success") + Translation.translate("prefix") + " " + Translation.translate("commands.save.success"));
+				plugin.saveAll();
+				sender.sendMessage(Translation.successedTranslate("commands.save.success"));
 			}
 		});
-		this.registerSubCommand(new SubCommand(this, subCommands.getOrDefault("reset", "Reset"), "showinfo.command.showinfo.reset"){
+		this.registerSubCommand(new SubCommand(this, subCommands.get("reset"), "showinfo.command.showinfo.reset"){
 			public void execute(CommandSender sender, String[] args){
 				plugin.saveDefaultData(true);
-				plugin.loadData();
-				if(Utils.toBoolean(plugin.getSetting().get("Enable").toString())){
+				plugin.loadAll();
+				if(plugin.getEnable()){
 					plugin.taskStart();
 				}
-				sender.sendMessage(Translation.translate("colors.success") + Translation.translate("prefix") + " " + Translation.translate("commands.reset.success"));
+				sender.sendMessage(Translation.successedTranslate("commands.reset.success"));
 			}
 		});
 	}
@@ -159,8 +156,18 @@ public class ShowInfoCommand extends Command{
 		this.subCommands.put(subCommand.getName().toLowerCase(), subCommand);
 	}
 
-	public SubCommand getSubCommand(String name){
-		return this.subCommands.get(name.toLowerCase());
+	public SubCommand getSubCommand(String command){
+		for(SubCommand subCommand : this.subCommands.values()){
+			if(subCommand.getName().equalsIgnoreCase(command)){
+				return subCommand;
+			}
+		}
+		for(SubCommand subCommand : this.subCommands.values()){
+			if(subCommand.getData().equals(command)){
+				return subCommand;
+			}
+		}
+		return null;
 	}
 
 	public ArrayList<SubCommand> getSubCommands(){

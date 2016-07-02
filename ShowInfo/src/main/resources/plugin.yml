@@ -1,9 +1,11 @@
 name: ShowInfo
 authors: [DeBe, if-Team]
-version: 1.0.3
+version: 1.0.0
 main: debe.nukkitplugin.showinfo.ShowInfo
 api: [1.0.0]
 website: "https://github.com/if-Team/Nukkit-Plugins/tree/master/ShowInfo"
+
+depend: [JsonSimpleLib]
 
 permissions:
   showinfo:

@@ -1,11 +1,51 @@
 {
-  "on": "On",
-  "off": "Off",
-  "enable": "Enable",
-  "disable": "Disable",
-  "push": "Push",
-  "period": "Period",
-  "reload": "Reload",
-  "save": "Save",
-  "reset": "Reset"
+  "on": {
+    "Command" : "On",
+    "Aliases" : []
+  },
+  "off": {
+    "Command" : "Off",
+    "Aliases" : []
+  },
+  "enable": {
+    "Command" : "Enable",
+    "Aliases" : [
+      "E"
+    ]
+  },
+  "disable": {
+    "Command" : "disable",
+    "Aliases" : [
+      "D"
+    ]
+  },
+  "push": {
+    "Command" : "Push",
+    "Aliases" : [
+      "P",
+      "PUSHLEVEL",
+      "PL"
+    ]
+  },
+  "period": {
+    "Command" : "Period",
+    "Aliases" : [
+      "PR",
+      "REPEATPERIOD",
+      "REPEATINGPERIOD",
+      "RP"
+    ]
+  },
+  "reload": {
+    "Command" : "Reload",
+    "Aliases" : []
+  },
+  "save": {
+    "Command" : "Save",
+    "Aliases" : []
+  },
+  "reset": {
+    "Command" : "Reset",
+    "Aliases" : []
+  }
 }

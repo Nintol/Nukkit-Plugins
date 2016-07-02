@@ -31,8 +31,8 @@ public class SaveCommandListener implements Listener{
 	public void saveAll(CommandSender sender){
 		Command command = Server.getInstance().getCommandMap().getCommand("save-all");
 		if(command != null && command.testPermissionSilent(sender)){
-			ShowInfo.getInstance().saveData();
-			Server.getInstance().getLogger().notice(Translation.translate("colors.success") + Translation.translate("prefix") + " " + Translation.translate("commands.save.success"));
+			ShowInfo.getInstance().saveAll();
+			Server.getInstance().getLogger().notice(Translation.successedTranslate("commands.save.success"));
 		}
 	}
 }

@@ -9,21 +9,21 @@ import debe.nukkitplugin.showinfo.utils.Translation;
 
 public abstract class SubCommand{
 	protected ShowInfoCommand mainCommand;
-	protected String name = "";
 	protected String permission = "";
 	protected String usage = "";
 	protected int needArgCount = 0;
+	private SubCommandData data;
 
 	public SubCommand(){}
 
-	public SubCommand(ShowInfoCommand mainCommand, String name, String permission){
+	public SubCommand(ShowInfoCommand mainCommand, SubCommandData data, String permission){
 		this.mainCommand = mainCommand;
-		this.name = name;
+		this.data = data;
 		this.permission = permission;
 	}
 
-	public SubCommand(ShowInfoCommand mainCommand, String name, String permission, String usage, int needArgCount){
-		this(mainCommand, name, permission);
+	public SubCommand(ShowInfoCommand mainCommand, SubCommandData data, String permission, String usage, int needArgCount){
+		this(mainCommand, data, permission);
 		this.usage = usage;
 		this.needArgCount = needArgCount;
 	}
@@ -39,7 +39,11 @@ public abstract class SubCommand{
 	public abstract void execute(CommandSender sender, String[] args);
 
 	public String getName(){
-		return this.name;
+		return this.data.getCommand();
+	}
+
+	public SubCommandData getData(){
+		return this.data;
 	}
 
 	public String getPermission(){
